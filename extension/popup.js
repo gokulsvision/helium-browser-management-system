@@ -14,6 +14,7 @@ function render(s) {
     const t = item.topic || "Other";
     (by[t] = by[t] || []).push(item);
   });
+  // Prefer site buckets inside a topic when we have them.
   const root = document.getElementById("groups");
   const topics = Object.keys(by).sort((a, b) => by[b].length - by[a].length);
   if (!topics.length) {
@@ -27,7 +28,13 @@ function render(s) {
     wrap.className = "topic";
     const h = document.createElement("div");
     h.className = "topic-h";
-    h.innerHTML = "<span>" + topic + " · " + by[topic].length + "</span>";
+    const sites = {};
+    by[topic].forEach((item) => {
+      const s = item.site || topic;
+      sites[s] = (sites[s] || 0) + 1;
+    });
+    const siteHint = Object.keys(sites).length > 1 ? " · " + Object.keys(sites).slice(0, 3).join(", ") : "";
+    h.innerHTML = "<span>" + topic + " · " + by[topic].length + siteHint + "</span>";
     const btn = document.createElement("button");
     btn.textContent = "Reopen";
     btn.addEventListener("click", () => {

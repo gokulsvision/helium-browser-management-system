@@ -30,7 +30,9 @@ steps in when the whole process tree is still over 5 GB.
 3. If RSS > 5 GB, sort background tabs by last used (**oldest first**).
 4. Skip the active tab, pinned tabs, tabs with sound, and `chrome://` / `helium://` pages.
 5. Hibernate until we are back under 5 GB.
-6. Save those URLs, grouped by topic (Video, Social, Mail, Code, Docs, AI, or the site).
+6. Save those URLs, grouped from the URL only (YouTube, GitHub/org, Gmail, Meet, …). No model.
+
+Idle tabs (45+ minutes, not active/pinned/playing sound) also hibernate in small batches, and any tab Helium already put to sleep is filed into the same shelf. That is how grouping works even when you are under 5 GB.
 
 ## Install (macOS)
 
