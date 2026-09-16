@@ -10,6 +10,19 @@ This is an extension plus a tiny native helper. It is not a Chromium fork.
 
 Each live tab in a Chromium browser is its own process. Forty of them will fill a 16 GB Mac, force swap, and make the whole machine hitch. Hibernating old tabs is the same idea as Chrome Memory Saver, with a hard budget and a shelf of sleeping tabs you can browse later.
 
+## How it runs (so it stays cheap)
+
+The extension does **not** sit in a tight loop. Under the cap it checks about
+every two minutes. Near or over 5 GB it checks more often. It does **not**
+wake on every tab switch.
+
+The native helper stays connected instead of launching Python on each check.
+Hibernate is batched (estimate ~120 MB per sleeping tab) so it does not
+measure RAM after every single discard.
+
+Helium already freezes idle tabs and restores sessions lazily. This tool only
+steps in when the whole process tree is still over 5 GB.
+
 ## Policy
 
 1. Measure RAM for the browser that is running the extension.

@@ -70,7 +70,14 @@ def detect_family():
     return "Helium"
 
 
+_ps_cache = (0.0, 0, 0)  # (expires, kb, procs)
+
+
 def rss_for_family(family):
+    global _ps_cache
+    now = time.monotonic()
+    if now < _ps_cache[0]:
+        return _ps_cache[1], _ps_cache[2]
     out = subprocess.check_output(["ps", "-axo", "rss=,comm="], text=True)
     total = 0
     procs = 0
@@ -79,9 +86,10 @@ def rss_for_family(family):
         if len(parts) != 2:
             continue
         name = parts[1]
-        if family in name and "bms-host" not in name and "helium-ram" not in name:
+        if family in name and "bms-host" not in name:
             total += int(parts[0])
             procs += 1
+    _ps_cache = (now + 2.0, total, procs)
     return total, procs
 
 
