@@ -50,6 +50,27 @@ Then in the browser:
 
 Optional: `bash scripts/make-app.sh` builds `dist/Browser Management System.app`, which runs the installer.
 
+## On-demand sort job (optional)
+
+Hibernate is still dumb (age + RAM). For piles that are **not** a browser URL —
+Downloads, screenshots, a list of leftover links — run a tiny local model
+**once**, then unload it:
+
+```bash
+# dry run (JSON only)
+python3 worker/sort_job.py ~/Downloads
+
+# move files into ~/Downloads/code, ~/Downloads/video, …
+python3 worker/sort_job.py --apply ~/Downloads
+
+# leftover URLs / the hibernation shelf
+python3 worker/sort_job.py ~/Library/Application\ Support/Browser\ Management\ System/hibernated.json
+```
+
+Uses Ollama model `qwen3.5:0.8b` (about 1 GB while running). It sets
+`keep_alive` to 0 when finished so the weights do not sit in RAM. Labels are
+fixed: `code video mail docs meetings social ai shopping news other`.
+
 ## Sleeping tabs
 
 Toolbar icon shows current RAM in GB.
