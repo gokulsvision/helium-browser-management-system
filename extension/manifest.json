@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Browser Management System",
+  "version": "1.1.0",
+  "description": "Keep Chromium browsers under a 5 GB RAM budget by hibernating oldest tabs and saving them by topic.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvpDJsLXc5szU4dWHztaX0TvX2Rz7jie/EvVELQvAWosRF4iR8WbmTpmjV45PlvB9yO+Kk+1uQ4xpafgeBv4Z1QaV1zJ8MB3rLjQ8SB0MliL02rf1kouZfT/XI2gTyHtGYlD1YvH5dV/+QNMn8nzOxg6QQVetmpYMS2n61HJAaw7GodMlVrTbJ4c714iJ4xFxqDbLrFtifSa1yHceV+J/+/LX+UxskiSGL0tswjAtD2mWvWgdEwRw8jIArYTIUnJkdu/OHstHxiS98LHDOeTIzSAUJnVBVtX9pdL0c17avIE3sC/e2yksdimPE8uAIpOkR3ki1jOQ1/L75LXYymRvJwIDAQAB",
+  "permissions": ["tabs", "storage", "alarms", "nativeMessaging"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_title": "Browser Management System",
+    "default_popup": "popup.html"
+  }
+}

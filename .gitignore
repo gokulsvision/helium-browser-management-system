@@ -1,0 +1,6 @@
+dist/
+*.pem
+*.der
+*.crx
+.DS_Store
+__pycache__/

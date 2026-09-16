@@ -1,0 +1,50 @@
+# Browser Management System
+
+Keep **Helium**, Chrome, Brave, Edge, and other Chromium browsers under a **5 GB RAM budget**.
+
+When the browser goes over 5 GB, the **oldest background tabs** hibernate first. They are not closed. They are saved and grouped by topic so you can reopen them later.
+
+This is an extension plus a tiny native helper. It is not a Chromium fork.
+
+## Why
+
+Each live tab in a Chromium browser is its own process. Forty of them will fill a 16 GB Mac, force swap, and make the whole machine hitch. Hibernating old tabs is the same idea as Chrome Memory Saver, with a hard budget and a shelf of sleeping tabs you can browse later.
+
+## Policy
+
+1. Measure RAM for the browser that is running the extension.
+2. If RSS ≤ 5 GB, do nothing.
+3. If RSS > 5 GB, sort background tabs by last used (**oldest first**).
+4. Skip the active tab, pinned tabs, tabs with sound, and `chrome://` / `helium://` pages.
+5. Hibernate until we are back under 5 GB.
+6. Save those URLs, grouped by topic (Video, Social, Mail, Code, Docs, AI, or the site).
+
+## Install (macOS)
+
+```bash
+git clone https://github.com/gokulsvision/browser-management-system.git
+cd browser-management-system
+bash scripts/install.sh
+```
+
+Then in the browser:
+
+1. Open `helium://extensions` or `chrome://extensions`
+2. Turn on **Developer mode**
+3. **Load unpacked** → select the `extension` folder in this repo
+
+Optional: `bash scripts/make-app.sh` builds `dist/Browser Management System.app`, which runs the installer.
+
+## Sleeping tabs
+
+Toolbar icon shows current RAM in GB.
+
+The popup lists hibernated tabs by topic, with **Reopen**.
+
+On disk:
+
+`~/Library/Application Support/Browser Management System/hibernated.json`
+
+## License
+
+MIT
