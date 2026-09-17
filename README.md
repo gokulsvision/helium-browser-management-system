@@ -1,38 +1,34 @@
 # Browser Management System
 
-Keep **Helium**, Chrome, Brave, Edge, and other Chromium browsers under a **5 GB RAM budget**.
+Keep **Helium** from filling RAM and disk — without logging you out.
 
-When the browser goes over 5 GB, the **oldest background tabs** hibernate first. They are not closed. They are saved and grouped by topic so you can reopen them later.
+This is **not** the file librarian (Downloads/Desktop). Tabs and caches only.
 
-This is an extension plus a tiny native helper. It is not a Chromium fork.
+## What it is
 
-## Why
+Two cheap jobs, one policy file.
 
-Each live tab in a Chromium browser is its own process. Forty of them will fill a 16 GB Mac, force swap, and make the whole machine hitch. Hibernating old tabs is the same idea as Chrome Memory Saver, with a hard budget and a shelf of sleeping tabs you can browse later.
+| | RAM | Disk |
+|---|---|---|
+| When | Browser is open | 3:00 AM, Helium quit |
+| Does | Hibernate oldest background tabs | Delete listed **site caches** |
+| Never | Close tabs, invent folders | Touch Cookies / Login Data / IndexedDB |
 
-## How it runs (so it stays cheap)
+Policy lives in `POLICY.md` (copied to `~/Library/Application Support/Browser Management System/POLICY.md` on install). Add another `### site.com` under Disk cache when a site starts hoarding (Riverside did: ~18 GB of service-worker cache).
 
-The extension does **not** sit in a tight loop. Under the cap it checks about
-every two minutes. Near or over 5 GB it checks more often. It does **not**
-wake on every tab switch.
+## RAM
 
-The native helper stays connected instead of launching Python on each check.
-Hibernate is batched (estimate ~120 MB per sleeping tab) so it does not
-measure RAM after every single discard.
+- Cap **5 GB** for the whole Helium process tree.
+- Oldest unused background tabs sleep first (not active, not pinned, not playing sound).
+- Idle 45+ minutes also sleep, in small batches.
+- Sleeping tabs are filed by URL (YouTube, GitHub/org, Gmail, …) so you can reopen them.
+- No model. The helper stays connected and does not poll on every tab switch.
 
-Helium already freezes idle tabs and restores sessions lazily. This tool only
-steps in when the whole process tree is still over 5 GB.
+## Disk
 
-## Policy
-
-1. Measure RAM for the browser that is running the extension.
-2. If RSS ≤ 5 GB, do nothing.
-3. If RSS > 5 GB, sort background tabs by last used (**oldest first**).
-4. Skip the active tab, pinned tabs, tabs with sound, and `chrome://` / `helium://` pages.
-5. Hibernate until we are back under 5 GB.
-6. Save those URLs, grouped from the URL only (YouTube, GitHub/org, Gmail, Meet, …). No model.
-
-Idle tabs (45+ minutes, not active/pinned/playing sound) also hibernate in small batches, and any tab Helium already put to sleep is filed into the same shelf. That is how grouping works even when you are under 5 GB.
+- Default: **riverside.com** service-worker cache, nightly at 03:00.
+- If Helium is still running, that night is skipped.
+- Log: `~/Library/Logs/browser-management-system.log`
 
 ## Install (macOS)
 
@@ -42,44 +38,7 @@ cd browser-management-system
 bash scripts/install.sh
 ```
 
-Then in the browser:
-
-1. Open `helium://extensions` or `chrome://extensions`
-2. Turn on **Developer mode**
-3. **Load unpacked** → select the `extension` folder in this repo
-
-Optional: `bash scripts/make-app.sh` builds `dist/Browser Management System.app`, which runs the installer.
-
-## On-demand sort job (optional)
-
-Hibernate is still dumb (age + RAM). For piles that are **not** a browser URL —
-Downloads, screenshots, a list of leftover links — run a tiny local model
-**once**, then unload it:
-
-```bash
-# dry run (JSON only)
-python3 worker/sort_job.py ~/Downloads
-
-# move files into ~/Downloads/code, ~/Downloads/video, …
-python3 worker/sort_job.py --apply ~/Downloads
-
-# leftover URLs / the hibernation shelf
-python3 worker/sort_job.py ~/Library/Application\ Support/Browser\ Management\ System/hibernated.json
-```
-
-Uses Ollama model `qwen3.5:0.8b` (about 1 GB while running). It sets
-`keep_alive` to 0 when finished so the weights do not sit in RAM. Labels are
-fixed: `code video mail docs meetings social ai shopping news other`.
-
-## Sleeping tabs
-
-Toolbar icon shows current RAM in GB.
-
-The popup lists hibernated tabs by topic, with **Reopen**.
-
-On disk:
-
-`~/Library/Application Support/Browser Management System/hibernated.json`
+Then **Developer mode → Load unpacked** on the `extension` folder (`helium://extensions`).
 
 ## License
 

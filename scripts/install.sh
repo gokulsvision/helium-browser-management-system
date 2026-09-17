@@ -44,15 +44,44 @@ install_manifest "$HOME/Library/Application Support/Microsoft Edge/NativeMessagi
 install_manifest "$HOME/Library/Application Support/Arc/User Data/NativeMessagingHosts"
 install_manifest "$HOME/Library/Application Support/Vivaldi/NativeMessagingHosts"
 
-mkdir -p "$HOME/Library/Application Support/Browser Management System"
+SHARE="$HOME/.local/share/browser-management-system"
+APP_SUPPORT="$HOME/Library/Application Support/Browser Management System"
+mkdir -p "$SHARE" "$APP_SUPPORT"
+cp "$ROOT/scripts/clear-site-cache.py" "$SHARE/clear-site-cache.py"
+chmod +x "$SHARE/clear-site-cache.py"
+if [ ! -f "$APP_SUPPORT/POLICY.md" ]; then
+  cp "$ROOT/POLICY.md" "$APP_SUPPORT/POLICY.md"
+fi
+
+PLIST_SRC="$ROOT/scripts/com.browsermanagement.cache.plist"
+PLIST_DST="$HOME/Library/LaunchAgents/com.browsermanagement.cache.plist"
+sed -e "s|CACHE_SCRIPT|$SHARE/clear-site-cache.py|g" \
+    -e "s|HOME|$HOME|g" \
+    "$PLIST_SRC" > "$PLIST_DST"
+
+UID_NUM="$(id -u)"
+launchctl bootout "gui/$UID_NUM/com.gokul.clear-riverside-cache" 2>/dev/null || true
+launchctl bootout "gui/$UID_NUM/com.browsermanagement.cache" 2>/dev/null || true
+launchctl bootstrap "gui/$UID_NUM" "$PLIST_DST"
+launchctl enable "gui/$UID_NUM/com.browsermanagement.cache"
+
+# old one-off helper now points at BMS
+mkdir -p "$HOME/.local/bin"
+cat > "$HOME/.local/bin/clear-helium-riverside-cache" <<EOF
+#!/bin/bash
+exec /usr/bin/python3 "$SHARE/clear-site-cache.py"
+EOF
+chmod +x "$HOME/.local/bin/clear-helium-riverside-cache"
 
 echo
 echo "Native helper installed."
+echo "Nightly site-cache job installed (see POLICY.md Disk cache)."
 echo "Load the unpacked extension from:"
 echo "  $ROOT/extension"
 echo
 echo "Helium:  helium://extensions  → Developer mode → Load unpacked"
-echo "Chrome:  chrome://extensions  → Developer mode → Load unpacked"
 echo
-echo "Sleeping tabs are saved to:"
-echo "  $HOME/Library/Application Support/Browser Management System/hibernated.json"
+echo "Policy (edit this to add sites):"
+echo "  $APP_SUPPORT/POLICY.md"
+echo "Sleeping tabs:"
+echo "  $APP_SUPPORT/hibernated.json"
